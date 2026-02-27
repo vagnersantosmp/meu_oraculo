@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup — Navegação Mobile</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px;
+            gap: 40px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f8fafc;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .comparison {
+            display: flex;
+            gap: 48px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Phone frame */
+        .phone {
+            width: 320px;
+            background: #1e2130;
+            border-radius: 36px;
+            border: 2px solid #334155;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            height: 560px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status bar */
+        .status-bar {
+            padding: 10px 24px 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        /* App content area */
+        .app-content {
+            flex: 1;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .content-card {
+            background: #252a3a;
+            border-radius: 16px;
+            padding: 16px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .content-row {
+            height: 12px;
+            background: #334155;
+            border-radius: 6px;
+        }
+
+        .content-row.short {
+            width: 60%;
+        }
+
+        .content-row.tall {
+            height: 60px;
+            background: #2d3347;
+            border-radius: 10px;
+        }
+
+        .content-row.header {
+            height: 20px;
+            width: 50%;
+            background: #3b4263;
+            border-radius: 8px;
+        }
+
+        /* CURRENT NAV - overflow */
+        .nav-current {
+            background: #1a1f2e;
+            border-top: 1px solid #2d3347;
+            padding: 8px 6px 10px;
+            flex-shrink: 0;
+        }
+
+        .nav-scroll-wrapper {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
+
+        .nav-scroll-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-width: 58px;
+            padding: 8px 4px;
+            border-radius: 10px;
+            border: 1px solid #2d3347;
+            background: #252a3a;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        .nav-label {
+            font-size: 9px;
+            font-weight: 500;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .nav-item.active .nav-label {
+            color: #818cf8;
+        }
+
+        /* Overflow indicator */
+        .overflow-badge {
+            position: absolute;
+            bottom: 48px;
+            right: 0;
+            background: linear-gradient(to left, #ef444480, transparent);
+            width: 60px;
+            height: 58px;
+            border-radius: 0;
+            pointer-events: none;
+        }
+
+        .badge-problem {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 100px;
+            text-align: center;
+            margin: 0 auto;
+            width: fit-content;
+            margin-top: 8px;
+        }
+
+        /* PROPOSED NAV */
+        .nav-proposed {
+            background: #1a1f2e;
+            border-top: 1px solid #2d3347;
+            padding: 8px 8px 10px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .nav-fixed-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-fixed-row .nav-item {
+            flex: 1;
+            min-width: unset;
+        }
+
+        .nav-item.more {
+            cursor: pointer;
+        }
+
+        .nav-item.more-active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .nav-item.more .nav-label {
+            color: #a78bfa;
+        }
+
+        /* More panel */
+        .more-panel {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 8px;
+            right: 8px;
+            background: rgba(30, 35, 55, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid #334155;
+            border-radius: 18px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .more-panel-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 12px 8px;
+            border-radius: 12px;
+            background: #252a3a;
+            border: 1px solid #2d3347;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .more-panel-item:hover {
+            background: #2e3450;
+            border-color: #4f5d8a;
+        }
+
+        .more-panel-item .nav-icon {
+            font-size: 22px;
+        }
+
+        .more-panel-item .nav-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        /* Annotations */
+        .annotation {
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            padding: 4px 10px;
+            border-radius: 100px;
+            margin: 4px auto;
+            width: fit-content;
+        }
+
+        .annotation.bad {
+            background: #ef444420;
+            color: #f87171;
+            border: 1px solid #ef444440;
+        }
+
+        .annotation.good {
+            background: #22c55e20;
+            color: #4ade80;
+            border: 1px solid #22c55e40;
+        }
+
+        /* Labels */
+        .phone-label {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .phone-label h2 {
+            color: #94a3b8;
+        }
+
+        .phone-label .annotation {
+            margin: 8px auto 0;
+        }
+
+        .legend-box {
+            background: #1e2130;
+            border: 1px solid #2d3347;
+            border-radius: 16px;
+            padding: 20px 24px;
+            max-width: 680px;
+            width: 100%;
+        }
+
+        .legend-box h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 14px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .legend-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #2d3347;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📱 Proposta de Navegação Mobile</h1>
+    <p class="subtitle">Meu Oráculo — Melhoria de Responsividade</p>
+
+    <div class="comparison">
+
+        <!-- PHONE 1: CURRENT -->
+        <div>
+            <div class="phone">
+                <!-- Status bar -->
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>📶 🔋</span>
+                </div>
+
+                <!-- Content -->
+                <div class="app-content">
+                    <div class="content-card">
+                        <div class="content-row header"></div>
+                        <div class="content-row tall"></div>
+                        <div class="content-row"></div>
+                        <div class="content-row short"></div>
+                        <div class="content-row tall"></div>
+                        <div class="content-row short"></div>
+                    </div>
+                </div>
+
+                <!-- CURRENT NAV (overflow) -->
+                <div class="nav-current">
+                    <div class="nav-scroll-wrapper">
+                        <div class="nav-item active">
+                            <span class="nav-icon">🏠</span>
+                            <span class="nav-label" style="color:#818cf8">Início</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">🛒</span>
+                            <span class="nav-label">Mercado</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">🚗</span>
+                            <span class="nav-label">Carro</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">💼</span>
+                            <span class="nav-label">Caixa</span>
+                        </div>
+                        <div class="nav-item" style="opacity:0.7">
+                            <span class="nav-icon">📅</span>
+                            <span class="nav-label">Contas</span>
+                        </div>
+                        <div class="nav-item" style="opacity:0.4; border-style:dashed">
+                            <span class="nav-icon">💳</span>
+                            <span class="nav-label">Cartões</span>
+                        </div>
+                        <div class="nav-item" style="opacity:0.15; border-style:dashed">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-label">Perfil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fade overlay indicating overflow -->
+                <div class="overflow-badge"></div>
+            </div>
+
+            <div class="phone-label">
+                <h2>❌ Situação Atual</h2>
+                <div class="annotation bad">7 itens — overflow horizontal</div>
+                <div class="annotation bad">Cartões e Perfil ficam ocultos</div>
+            </div>
+        </div>
+
+        <!-- PHONE 2: PROPOSED -->
+        <div>
+            <div class="phone" id="phone2">
+                <!-- Status bar -->
+                <div class="status-bar">
+                    <span>9:41</span>
+                    <span>📶 🔋</span>
+                </div>
+
+                <!-- Content -->
+                <div class="app-content">
+                    <div class="content-card">
+                        <div class="content-row header"></div>
+                        <div class="content-row tall"></div>
+                        <div class="content-row"></div>
+                        <div class="content-row short"></div>
+                        <div class="content-row tall"></div>
+                        <div class="content-row short"></div>
+                    </div>
+                </div>
+
+                <!-- PROPOSED NAV -->
+                <div class="nav-proposed">
+
+                    <!-- More panel (shown by default in mockup) -->
+                    <div class="more-panel" id="morePanel">
+                        <div class="more-panel-item" onclick="closeMore()">
+                            <span class="nav-icon">🚗</span>
+                            <span class="nav-label">Carro</span>
+                        </div>
+                        <div class="more-panel-item" onclick="closeMore()">
+                            <span class="nav-icon">💳</span>
+                            <span class="nav-label">Cartões</span>
+                        </div>
+                        <div class="more-panel-item" onclick="closeMore()">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-label">Perfil</span>
+                        </div>
+                    </div>
+
+                    <div class="nav-fixed-row">
+                        <div class="nav-item active">
+                            <span class="nav-icon">🏠</span>
+                            <span class="nav-label" style="color:#818cf8">Início</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">🛒</span>
+                            <span class="nav-label">Mercado</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">💼</span>
+                            <span class="nav-label">Caixa</span>
+                        </div>
+                        <div class="nav-item">
+                            <span class="nav-icon">📅</span>
+                            <span class="nav-label">Contas</span>
+                        </div>
+                        <div class="nav-item more more-active" onclick="toggleMore()">
+                            <span class="nav-icon">⋯</span>
+                            <span class="nav-label">Mais</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phone-label">
+                <h2>✅ Proposta</h2>
+                <div class="annotation good">5 itens fixos — cabe perfeitamente</div>
+                <div class="annotation good">Tap em "Mais" abre painel expansível</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-box">
+        <h3>📋 Resumo da Solução</h3>
+        <div class="legend-row">
+            <span class="legend-icon">1️⃣</span>
+            <span><b>Barra fixa (5 itens):</b> Início, Mercado, Caixa, Contas e botão "Mais" — todos visíveis sem
+                scroll.</span>
+        </div>
+        <div class="legend-row">
+            <span class="legend-icon">2️⃣</span>
+            <span><b>Painel "Mais":</b> Carro, Cartões e Perfil ficam em um menu flutuante com glassmorphism, abre/fecha
+                com tap.</span>
+        </div>
+        <div class="legend-row">
+            <span class="legend-icon">3️⃣</span>
+            <span><b>Indicador de rota ativa:</b> Se o usuário está em Carro, Cartões ou Perfil, o botão "Mais" fica
+                destacado.</span>
+        </div>
+        <div class="legend-row">
+            <span class="legend-icon">4️⃣</span>
+            <span><b>Fechar automaticamente:</b> Tap fora do painel fecha o menu. Qualquer navegação fecha o
+                painel.</span>
+        </div>
+        <hr>
+        <div class="legend-row">
+            <span class="legend-icon">⚙️</span>
+            <span><b>Arquivo a modificar:</b> apenas <code
+                    style="background:#2d3347;padding:2px 6px;border-radius:4px;font-size:12px">src/components/BottomNav.tsx</code>
+                — mudança cirúrgica sem impacto em outras telas.</span>
+        </div>
+    </div>
+
+    <script>
+        let moreOpen = true;
+
+        function toggleMore() {
+            moreOpen = !moreOpen;
+            document.getElementById('morePanel').style.display = moreOpen ? 'grid' : 'none';
+        }
+
+        function closeMore() {
+            moreOpen = false;
+            document.getElementById('morePanel').style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>

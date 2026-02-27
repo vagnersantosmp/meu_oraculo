@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default Light */
+    --bg-background: #FAFAFA;
+    /* gray-50 */
+    --bg-card: #FFFFFF;
+    --text-primary: #1F2937;
+    /* gray-800 */
+    --text-secondary: #6B7280;
+    /* gray-500 */
+    --border-color: #E5E7EB;
+    /* gray-200 */
+    --primary-color: #2563EB;
+    /* blue-600 */
+    --bg-muted: #F3F4F6;
+    /* gray-100 */
+  }
+
+  .dark {
+    --bg-background: #111827;
+    /* gray-900 */
+    --bg-card: #1F2937;
+    /* gray-800 */
+    --text-primary: #F9FAFB;
+    /* gray-50 */
+    --text-secondary: #9CA3AF;
+    /* gray-400 */
+    --border-color: #374151;
+    /* gray-700 */
+    --primary-color: #3B82F6;
+    /* blue-500 */
+    --bg-muted: #374151;
+    /* gray-700 */
+  }
+
+  .soft {
+    --bg-background: #FDFBF7;
+    /* warm beige/white */
+    --bg-card: #FFFFFF;
+    --text-primary: #44403C;
+    /* stone-700 */
+    --text-secondary: #78716C;
+    /* stone-500 */
+    --border-color: #E7E5E4;
+    /* stone-200 */
+    --primary-color: #57534E;
+    /* stone-600 (neutral look) or keep blue? Let's go neutral/warm */
+    --bg-muted: #E7E5E4;
+    /* stone-200 */
+  }
+
+  html.high-contrast {
+    --bg-background: #000000;
+    --bg-card: #000000;
+    --text-primary: #FFFF00;
+    --text-secondary: #FFFFFF;
+    --border-color: #FFFFFF;
+    --primary-color: #FFFF00;
+    --bg-muted: #333333;
+  }
+
+  html {
+    font-size: var(--a11y-font-scale, 16px);
+    filter: brightness(var(--a11y-brightness, 1)) contrast(var(--a11y-contrast, 1));
+  }
+
+  body {
+    background-color: var(--bg-background);
+    color: var(--text-primary);
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Inter', sans-serif;
+    /* Adding a nice font by default */
+  }
+}
