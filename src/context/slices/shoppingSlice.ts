@@ -12,6 +12,7 @@ import * as db from '../../lib/supabaseService';
 import type { ShoppingList, ShoppingItem, LedgerTransaction, CreditTransaction, PaymentMethod } from '../../types';
 
 type SetLedger = React.Dispatch<React.SetStateAction<LedgerTransaction[]>>;
+type SetCreditTransactions = React.Dispatch<React.SetStateAction<CreditTransaction[]>>;
 type AddCreditTransactionFn = (data: Omit<CreditTransaction, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
 type ProductCatalog = { id: string; nome_produto: string; categoria: string };
 
@@ -23,6 +24,7 @@ export function createShoppingSlice(
     setLedger: SetLedger,
     onError: (msg: string, detail?: string) => void,
     addCreditTransaction: AddCreditTransactionFn = async () => { },
+    setCreditTransactions: SetCreditTransactions = () => { },
 ) {
     const recalcListTotal = (items: ShoppingItem[]): number =>
         items.reduce((acc, i) => acc + (i.valor_total_item || 0), 0);
@@ -68,12 +70,24 @@ export function createShoppingSlice(
     };
 
     const reopenShoppingList = (id: string) => {
+        const list = shoppingLists.find(l => l.id === id);
+        const wasCredit = list?.payment_method === 'credito';
+
         setShoppingLists(prev => prev.map(l =>
-            l.id === id ? { ...l, status: 'aberta' as const, data_compra: null } : l
+            l.id === id ? { ...l, status: 'aberta' as const, data_compra: null, payment_method: undefined } : l
         ));
-        setLedger(prev => prev.filter(t => t.source_ref !== id));
+
+        if (wasCredit) {
+            // ── Estorno: remove credit transactions linked to this list ───
+            setCreditTransactions(prev => prev.filter(t => t.source_ref !== id));
+            db.deleteCreditTransactionsBySourceRef(id).catch(console.error);
+        } else {
+            // ── Estorno: remove ledger (cash/pix/debit) entry ───
+            setLedger(prev => prev.filter(t => t.source_ref !== id));
+            db.deleteTransactionsBySourceRef(id).catch(console.error);
+        }
+
         db.updateShoppingListDB(id, { status: 'aberta', data_compra: null } as Partial<ShoppingList>).catch(console.error);
-        db.deleteTransactionsBySourceRef(id).catch(console.error);
     };
 
     const finalizeShoppingList = (
@@ -119,6 +133,7 @@ export function createShoppingSlice(
                 installment_number: 1,
                 status: 'open_invoice',
                 payment_date: null,
+                source_ref: id,
             }).catch(() => onError('Erro ao lançar na fatura', 'A lista foi finalizada, mas o lançamento no cartão não foi salvo.'));
         } else {
             // ── Cash / PIX / Debit path: deduct from ledger ──────────────

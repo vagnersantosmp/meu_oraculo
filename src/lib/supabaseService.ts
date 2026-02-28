@@ -416,3 +416,11 @@ export async function deleteCreditTransactionDB(id: string) {
     const { error } = await supabase.from('credit_transactions').delete().eq('id', id);
     if (error) throw error;
 }
+
+export async function deleteCreditTransactionsBySourceRef(sourceRef: string) {
+    const { error } = await supabase
+        .from('credit_transactions')
+        .delete()
+        .eq('source_ref', sourceRef);
+    if (error) throw error;
+}

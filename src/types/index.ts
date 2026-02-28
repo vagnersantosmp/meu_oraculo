@@ -130,5 +130,6 @@ export interface CreditTransaction {
     parent_transaction_id?: string;
     status: 'open_invoice' | 'closed_invoice' | 'paid';
     payment_date?: string | null;
+    source_ref?: string | null;  // e.g. shopping list id
     created_at: string;
 }

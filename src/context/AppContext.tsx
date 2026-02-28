@@ -259,7 +259,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const shoppingSlice = createShoppingSlice(
         userId, shoppingLists, setShoppingLists, setProductCatalog, setLedger,
         (msg, detail) => toast.error(msg, detail),
-        stableAddCreditTransaction
+        stableAddCreditTransaction,
+        setCreditTransactions
     );
 
     const ledgerSlice = createLedgerSlice(userId, setLedger);
