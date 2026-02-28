@@ -3,13 +3,16 @@
  *
  * Cross-dependency: finalizeShoppingList and reopenShoppingList need to
  * create/remove ledger entries. They receive setLedger and toast as dependencies.
+ * When payment method is 'credito', the total is sent to the credit card system
+ * via addCreditTransaction instead of the cash ledger.
  */
 import React from 'react';
 import { categorizarItem } from '../../lib/categorias';
 import * as db from '../../lib/supabaseService';
-import type { ShoppingList, ShoppingItem, LedgerTransaction } from '../../types';
+import type { ShoppingList, ShoppingItem, LedgerTransaction, CreditTransaction, PaymentMethod } from '../../types';
 
 type SetLedger = React.Dispatch<React.SetStateAction<LedgerTransaction[]>>;
+type AddCreditTransactionFn = (data: Omit<CreditTransaction, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
 type ProductCatalog = { id: string; nome_produto: string; categoria: string };
 
 export function createShoppingSlice(
@@ -19,6 +22,7 @@ export function createShoppingSlice(
     setProductCatalog: React.Dispatch<React.SetStateAction<ProductCatalog[]>>,
     setLedger: SetLedger,
     onError: (msg: string, detail?: string) => void,
+    addCreditTransaction: AddCreditTransactionFn = async () => { },
 ) {
     const recalcListTotal = (items: ShoppingItem[]): number =>
         items.reduce((acc, i) => acc + (i.valor_total_item || 0), 0);
@@ -72,7 +76,13 @@ export function createShoppingSlice(
         db.deleteTransactionsBySourceRef(id).catch(console.error);
     };
 
-    const finalizeShoppingList = (id: string, finalTotal?: number) => {
+    const finalizeShoppingList = (
+        id: string,
+        finalTotal?: number,
+        paymentMethod: PaymentMethod = 'pix',
+        cardId?: string,
+        installments: number = 1,
+    ) => {
         let listTotal = 0;
         let listName = '';
 
@@ -84,26 +94,43 @@ export function createShoppingSlice(
                 ...list,
                 status: 'finalizada' as const,
                 valor_total_lista: listTotal,
-                data_compra: new Date().toISOString()
+                data_compra: new Date().toISOString(),
+                payment_method: paymentMethod,
             };
         }));
 
         db.updateShoppingListDB(id, {
             status: 'finalizada',
             valor_total_lista: finalTotal,
-            data_compra: new Date().toISOString()
+            data_compra: new Date().toISOString(),
         } as Partial<ShoppingList>).catch(console.error);
 
-        if (listTotal > 0) {
+        if (listTotal <= 0) return;
+
+        if (paymentMethod === 'credito' && cardId) {
+            // ── Credit card path: create a credit transaction ──────────────
+            addCreditTransaction({
+                card_id: cardId,
+                date: new Date().toISOString(),
+                category: 'Mercado',
+                description: `Lista: ${listName}`,
+                value: listTotal,
+                installments,
+                installment_number: 1,
+                status: 'open_invoice',
+                payment_date: null,
+            }).catch(() => onError('Erro ao lançar na fatura', 'A lista foi finalizada, mas o lançamento no cartão não foi salvo.'));
+        } else {
+            // ── Cash / PIX / Debit path: deduct from ledger ──────────────
             const txnData = {
                 category: 'Mercado',
-                description: `Lista: ${listName} `,
+                description: `Lista: ${listName}`,
                 value: listTotal,
                 type: 'expense' as const,
-                payment_method: 'pix' as const,
+                payment_method: paymentMethod,
                 source: 'system' as const,
                 source_ref: id,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
             };
             db.createTransaction(userId, txnData).then(txn => {
                 setLedger(prev => [txn, ...prev]);

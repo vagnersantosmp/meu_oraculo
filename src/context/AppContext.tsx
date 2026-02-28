@@ -42,7 +42,7 @@ interface AppContextType {
     duplicateShoppingList: (id: string) => void;
     renameShoppingList: (id: string, nome: string) => void;
     reopenShoppingList: (id: string) => void;
-    finalizeShoppingList: (id: string, finalTotal?: number) => void;
+    finalizeShoppingList: (id: string, finalTotal?: number, paymentMethod?: import('../types').PaymentMethod, cardId?: string, installments?: number) => void;
     addItemToList: (listId: string, nome: string, categoria?: string) => void;
     addMultipleItemsToList: (listId: string, items: { nome: string; categoria: string }[]) => void;
     updateItemInList: (listId: string, itemId: string, data: Partial<ShoppingItem>) => void;
@@ -242,9 +242,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     // ── Slices (domain-specific logic extracted into separate files) ───────────
+    const cardsSlice = createCardsSlice(userId, creditCards, setCreditCards, setCreditTransactions);
+
     const shoppingSlice = createShoppingSlice(
         userId, shoppingLists, setShoppingLists, setProductCatalog, setLedger,
-        (msg, detail) => toast.error(msg, detail)
+        (msg, detail) => toast.error(msg, detail),
+        cardsSlice.addCreditTransaction
     );
 
     const ledgerSlice = createLedgerSlice(userId, setLedger);
@@ -256,9 +259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setFixedExpenses, setRecurringBills, setCreditTransactions, setLedger, generatingRef
     );
 
-    const cardsSlice = createCardsSlice(userId, creditCards, setCreditCards, setCreditTransactions);
-
-    // getCarAlerts is a pure computation from car state — wraps the slice helper
+    // getCarAlerts is a pure computation from car state—wraps the slice helper
     const getCarAlerts = useCallback(
         () => carSlice.getCarAlerts(fuelRecords, maintenanceRecords),
         [fuelRecords, maintenanceRecords]

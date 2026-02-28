@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
+import type { PaymentMethod } from '../../types';
 import { Card, Input, Button, Modal } from '../../components/ui';
 import { CurrencyInput } from '../../components/CurrencyInput';
 import { AddItemsDialog } from '../../components/AddItemsDialog';
@@ -25,7 +26,8 @@ export default function ShoppingDetail() {
         updateItemInList,
         deleteItemFromList,
         finalizeShoppingList,
-        reopenShoppingList
+        reopenShoppingList,
+        creditCards,
     } = useApp();
 
     const [novoItem, setNovoItem] = useState('');
@@ -37,8 +39,13 @@ export default function ShoppingDetail() {
     // Finalize Modal State
     const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
     const [finalTotalInput, setFinalTotalInput] = useState(0);
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
+    const [selectedCardId, setSelectedCardId] = useState('');
+    const [installments, setInstallments] = useState(1);
+
 
     const lista = shoppingLists.find(l => l.id === id);
+
 
     const itens = lista?.items || [];
 
@@ -74,6 +81,14 @@ export default function ShoppingDetail() {
 
     const itensPegos = itens.filter(i => i.marcado_como_pegado).length;
     const progresso = itens.length > 0 ? (itensPegos / itens.length) * 100 : 0;
+
+    const openFinalizeModal = () => {
+        setFinalTotalInput(totalCalculado);
+        setPaymentMethod('pix');
+        setSelectedCardId(creditCards[0]?.id || '');
+        setInstallments(1);
+        setIsFinalizeModalOpen(true);
+    };
 
     const adicionarItemRapido = () => {
         if (!novoItem.trim() || !id) return;
@@ -321,7 +336,7 @@ export default function ShoppingDetail() {
                             </p>
                         </div>
                         {lista.status === 'aberta' && itens.length > 0 && (
-                            <Button onClick={() => { setFinalTotalInput(totalCalculado); setIsFinalizeModalOpen(true); }}>
+                            <Button onClick={openFinalizeModal}>
                                 <CheckCircle2 className="w-5 h-5 mr-2" />
                                 Finalizar compra
                             </Button>
@@ -340,12 +355,7 @@ export default function ShoppingDetail() {
             {/* Finalize Confirmation Modal */}
             <Modal isOpen={isFinalizeModalOpen} onClose={() => setIsFinalizeModalOpen(false)} title="Finalizar Compra">
                 <div className="space-y-4">
-                    <p className="text-sm text-text-secondary">
-                        Confirme o valor total da compra para lançar no caixa.
-                        <br />
-                        <span className="text-xs opacity-70"> (O valor dos itens somados é R$ {totalCalculado.toFixed(2)})</span>
-                    </p>
-
+                    {/* Total */}
                     <div>
                         <label className="text-xs font-medium text-text-secondary mb-1 block">Valor Final (Nota Fiscal)</label>
                         <CurrencyInput
@@ -353,16 +363,91 @@ export default function ShoppingDetail() {
                             onChange={setFinalTotalInput}
                             className="text-xl py-3"
                         />
+                        <p className="text-xs text-text-secondary/70 mt-1">
+                            Itens somados: R$ {totalCalculado.toFixed(2).replace('.', ',')}
+                        </p>
                     </div>
 
-                    <div className="flex gap-2 justify-end mt-4">
+                    {/* Payment Method */}
+                    <div>
+                        <label className="text-xs font-medium text-text-secondary mb-1 block">Forma de Pagamento</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {([
+                                { value: 'pix', label: 'PIX' },
+                                { value: 'dinheiro', label: 'Dinheiro' },
+                                { value: 'debito', label: 'Débito' },
+                                { value: 'transferencia', label: 'Transferência' },
+                                { value: 'credito', label: '💳 Crédito' },
+                            ] as { value: PaymentMethod; label: string }[]).map(opt => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => setPaymentMethod(opt.value)}
+                                    className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${paymentMethod === opt.value
+                                        ? 'bg-primary text-white border-primary shadow-sm'
+                                        : 'bg-card text-text-secondary border-border hover:border-primary/50'
+                                        }`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Credit card options */}
+                    {paymentMethod === 'credito' && (
+                        <div className="space-y-3 bg-muted/50 rounded-xl p-3">
+                            <div>
+                                <label className="text-xs font-medium text-text-secondary mb-1 block">Cartão</label>
+                                {creditCards.length === 0 ? (
+                                    <p className="text-sm text-red-500">Nenhum cartão cadastrado. Cadastre um cartão antes.</p>
+                                ) : (
+                                    <select
+                                        value={selectedCardId}
+                                        onChange={e => setSelectedCardId(e.target.value)}
+                                        className="w-full h-10 rounded-lg border border-border bg-card text-text-primary px-3 text-sm"
+                                    >
+                                        {creditCards.map(card => (
+                                            <option key={card.id} value={card.id}>{card.name}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-text-secondary mb-1 block">Parcelas</label>
+                                <select
+                                    value={installments}
+                                    onChange={e => setInstallments(Number(e.target.value))}
+                                    className="w-full h-10 rounded-lg border border-border bg-card text-text-primary px-3 text-sm"
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
+                                        <option key={n} value={n}>
+                                            {n}x {n > 1 ? `de R$ ${(finalTotalInput / n).toFixed(2).replace('.', ',')}` : '(à vista)'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <p className="text-xs text-text-secondary">
+                                💡 O valor será lançado na fatura do cartão selecionado — não desconta do caixa agora.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Info for cash payments */}
+                    {paymentMethod !== 'credito' && (
+                        <p className="text-xs text-text-secondary bg-muted/50 rounded-lg p-3">
+                            💰 O valor será descontado diretamente do <strong>Caixa</strong> ao confirmar.
+                        </p>
+                    )}
+
+                    <div className="flex gap-2 justify-end pt-1">
                         <Button variant="ghost" onClick={() => setIsFinalizeModalOpen(false)}>Cancelar</Button>
                         <Button
                             className="bg-green-600 hover:bg-green-700 text-white"
+                            disabled={paymentMethod === 'credito' && creditCards.length === 0}
                             onClick={() => {
-                                if (id) finalizeShoppingList(id, finalTotalInput);
+                                if (id) finalizeShoppingList(id, finalTotalInput, paymentMethod, selectedCardId || undefined, installments);
                                 setIsFinalizeModalOpen(false);
-                                navigate('/shopping'); // Go back to list after finalizing? Or stay? Stay is fine.
+                                navigate('/shopping');
                             }}
                         >
                             Confirmar
