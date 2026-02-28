@@ -113,6 +113,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [recurringBills, setRecurringBills] = useState<RecurringBill[]>([]);
     const [stats, setStats] = useState<DashboardStats>({ totalIncome: 0, totalExpense: 0, balance: 0 });
     const generatingRef = useRef(false);
+    // Ref to always have latest creditCards for use inside stable closures
+    const creditCardsRef = useRef<CreditCard[]>([]);
+    useEffect(() => { creditCardsRef.current = creditCards; }, [creditCards]);
 
     // ── Global Month Navigation ────────────────────────────────────────────────
     const [currentMonth, setCurrentMonth] = useState(() => {
@@ -244,10 +247,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // ── Slices (domain-specific logic extracted into separate files) ───────────
     const cardsSlice = createCardsSlice(userId, creditCards, setCreditCards, setCreditTransactions);
 
+    // Stable addCreditTransaction that always reads the latest creditCards via ref
+    const stableAddCreditTransaction = useCallback(
+        (data: Parameters<typeof cardsSlice.addCreditTransaction>[0]) => {
+            const freshSlice = createCardsSlice(userId, creditCardsRef.current, setCreditCards, setCreditTransactions);
+            return freshSlice.addCreditTransaction(data);
+        },
+        [userId] // only userId needed — creditCardsRef is always fresh
+    );
+
     const shoppingSlice = createShoppingSlice(
         userId, shoppingLists, setShoppingLists, setProductCatalog, setLedger,
         (msg, detail) => toast.error(msg, detail),
-        cardsSlice.addCreditTransaction
+        stableAddCreditTransaction
     );
 
     const ledgerSlice = createLedgerSlice(userId, setLedger);
