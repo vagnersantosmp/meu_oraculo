@@ -1,6 +1,5 @@
 # 🔮 Meu Oráculo
 
-![Meu Oráculo Banner](public/favicon.ico) *Substitua por um banner do projeto, se houver.*
 
 **Meu Oráculo** é uma aplicação web completa para gestão financeira e organização pessoal. Construída com tecnologias modernas, a plataforma oferece não apenas o rastreamento de receitas e despesas, mas também ferramentas dedicadas para gerenciar cartões de crédito, contas fixas, veículos, listas de compras e metas mensais. O objetivo é fornecer uma visão 360º da sua saúde financeira em um só lugar.
 
