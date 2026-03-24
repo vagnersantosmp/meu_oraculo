@@ -1,12 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Card } from '../components/ui';
 import { AccessibilityMenu } from '../components/AccessibilityMenu';
 import { formatCurrency, cn } from '../lib/utils';
 import { useFinancialSummary } from '../hooks/useFinancialSummary';
+import { CategoryPieChart } from '../components/dashboard/CategoryPieChart';
+import { IncomeExpenseBarChart } from '../components/dashboard/IncomeExpenseBarChart';
+import { BalanceLineChart } from '../components/dashboard/BalanceLineChart';
 import {
-    TrendingUp, TrendingDown,
+    TrendingUp, TrendingDown, BarChart2, ChevronDown,
     ArrowDown, Bell, Flame, ArrowRight, ChevronRight, CalendarDays, Check
 } from 'lucide-react';
 
@@ -15,6 +18,15 @@ export function Dashboard() {
     const navigate = useNavigate();
     const carAlert = getCarAlerts();
 
+    // ── Collapsible Reports Section ──
+    const [reportsOpen, setReportsOpen] = useState<boolean>(() => {
+        try { return localStorage.getItem('reportsOpen') !== 'false'; } catch { return true; }
+    });
+    const toggleReports = () => setReportsOpen(prev => {
+        const next = !prev;
+        try { localStorage.setItem('reportsOpen', String(next)); } catch { /* ignore */ }
+        return next;
+    });
     // ── Canonical financial calculations via shared hook ──
     const summary = useFinancialSummary({ month: currentMonth, ledger, fixedExpenses, monthlyGoals });
 
@@ -28,7 +40,8 @@ export function Dashboard() {
         // Fixed expenses visible this month (for UI card)
         const fixed = fixedExpenses.filter(f => {
             if (!f.id.startsWith('virtual-invoice') && f.due_date.startsWith(monthStr)) return true;
-            if (f.id.startsWith('virtual-invoice') && !f.paid) return true;
+            // Virtual (credit card) invoices: show if due this month or already overdue — NOT future months
+            if (f.id.startsWith('virtual-invoice') && !f.paid && f.due_date.substring(0, 7) <= monthStr) return true;
             if (f.id.startsWith('virtual-invoice') && f.paid && f.payment_date?.startsWith(monthStr)) return true;
             return false;
         });
@@ -42,29 +55,45 @@ export function Dashboard() {
 
 
     // Derived Lists for UI
-    const top5Categories = useMemo(() => {
+    // Shared category totals (ledger + fixed expenses paid + credit invoices)
+    const catTotals = useMemo(() => {
         const expenses = monthData.transactions.filter(t => t.type === 'expense');
-        const catTotals: Record<string, number> = {};
+        const totals: Record<string, number> = {};
         expenses.forEach(t => {
-            catTotals[t.category] = (catTotals[t.category] || 0) + t.value;
+            totals[t.category] = (totals[t.category] || 0) + t.value;
         });
-
-        // Add paid credit card invoices (virtual invoices) as "Cartão de Crédito" category
         const paidInvoiceTotal = monthData.fixed
             .filter(f => f.id.startsWith('virtual-invoice') && f.paid)
             .reduce((s, f) => s + f.value, 0);
         if (paidInvoiceTotal > 0) {
-            catTotals['Cartão de Crédito'] = (catTotals['Cartão de Crédito'] || 0) + paidInvoiceTotal;
+            totals['Cartão de Crédito'] = (totals['Cartão de Crédito'] || 0) + paidInvoiceTotal;
         }
-
-        const sorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        const total = Object.values(catTotals).reduce((s, v) => s + v, 0);
-        return sorted.map(([name, value]) => ({
-            name,
-            value,
-            percentage: total > 0 ? Math.round((value / total) * 100) : 0,
-        }));
+        monthData.fixed
+            .filter(f => !f.id.startsWith('virtual-invoice') && f.paid)
+            .forEach(f => {
+                const cat = f.category || 'Contas Fixas';
+                totals[cat] = (totals[cat] || 0) + f.value;
+            });
+        return totals;
     }, [monthData.transactions, monthData.fixed]);
+
+    // Top 5 for ranking list widget
+    const top5Categories = useMemo(() => {
+        const total = Object.values(catTotals).reduce((s, v) => s + v, 0);
+        return Object.entries(catTotals)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([name, value]) => ({ name, value, percentage: total > 0 ? Math.round((value / total) * 100) : 0 }));
+    }, [catTotals]);
+
+    // All categories for pie chart (full expense overview)
+    const allCategories = useMemo(() => {
+        const total = Object.values(catTotals).reduce((s, v) => s + v, 0);
+        return Object.entries(catTotals)
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, value]) => ({ name, value, percentage: total > 0 ? Math.round((value / total) * 100) : 0 }));
+    }, [catTotals]);
+
 
     const recentExpenses = useMemo(() => {
         // Merge Ledger expenses with Paid Fixed Expenses for unified history
@@ -189,20 +218,41 @@ export function Dashboard() {
 
             {/* Balance + Income/Expense in one row */}
             <div className="grid grid-cols-3 gap-2">
+                {/* ── Saldo Atual com detalhamento ── */}
                 <Card className="bg-gradient-to-r from-gray-900 to-gray-800 text-white border-none dark:from-black dark:to-gray-900 py-2.5 px-3 flex flex-col justify-between">
                     <div>
-                        <p className="text-[10px] text-gray-400 uppercase">Saldo (Final)</p>
+                        <p className="text-[10px] text-gray-400 uppercase">Saldo Atual</p>
                         <p className="text-lg sm:text-xl font-bold mt-0.5 leading-none">{formatCurrency(summary.currentBalance)}</p>
                     </div>
-                    {summary.fixedPending > 0 && (
-                        <div className="mt-1.5 pt-1.5 border-t border-gray-700/50">
-                            <p className="text-[9px] text-gray-400 uppercase">Livre Projetado</p>
-                            <p className={cn("text-[11px] sm:text-xs font-semibold", summary.projectedBalance < 0 ? "text-red-400" : "text-gray-300")}>
-                                {formatCurrency(summary.projectedBalance)}
-                            </p>
+                    <div className="mt-1.5 pt-1.5 border-t border-gray-700/50 space-y-0.5">
+                        {summary.openingBalance !== 0 && (
+                            <div className="flex justify-between items-center">
+                                <span className="text-[9px] text-gray-500">Mês anterior</span>
+                                <span className={cn("text-[9px] font-medium", summary.openingBalance >= 0 ? "text-gray-300" : "text-red-400")}>
+                                    {summary.openingBalance >= 0 ? '+' : ''}{formatCurrency(summary.openingBalance)}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center">
+                            <span className="text-[9px] text-gray-500">Receitas</span>
+                            <span className="text-[9px] font-medium text-green-400">+{formatCurrency(summary.monthIncome)}</span>
                         </div>
-                    )}
+                        <div className="flex justify-between items-center">
+                            <span className="text-[9px] text-gray-500">Despesas</span>
+                            <span className="text-[9px] font-medium text-red-400">-{formatCurrency(summary.monthLedgerExpense + summary.monthFixedPaid)}</span>
+                        </div>
+                        {summary.fixedPending > 0 && (
+                            <div className="flex justify-between items-center pt-0.5 border-t border-gray-700/50">
+                                <span className="text-[9px] text-gray-500">Livre Projetado</span>
+                                <span className={cn("text-[9px] font-semibold", summary.projectedBalance < 0 ? "text-red-400" : "text-gray-300")}>
+                                    {formatCurrency(summary.projectedBalance)}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </Card>
+
+                {/* ── Receitas ── */}
                 <Card className="bg-green-50 border-green-100 dark:bg-green-900/20 dark:border-green-900/30 py-3 px-3">
                     <div className="flex items-center gap-1 mb-0.5">
                         <TrendingUp size={12} className="text-green-600 dark:text-green-400" />
@@ -210,6 +260,8 @@ export function Dashboard() {
                     </div>
                     <p className="text-sm sm:text-base font-bold text-green-700 dark:text-green-300">{formatCurrency(summary.monthIncome)}</p>
                 </Card>
+
+                {/* ── Despesas ── */}
                 <Card className="bg-red-50 border-red-100 dark:bg-red-900/20 dark:border-red-900/30 py-3 px-3">
                     <div className="flex items-center gap-1 mb-0.5">
                         <TrendingDown size={12} className="text-red-600 dark:text-red-400" />
@@ -235,7 +287,67 @@ export function Dashboard() {
                 </Card>
             )}
 
-            {/* Top category + Recent expenses — side by side on md+ */}
+            {/* ── Reports Section (collapsible) ──────────────────────────── */}
+            <Card className="py-2.5 px-3">
+                {/* Header / toggle button */}
+                <button
+                    onClick={toggleReports}
+                    className="w-full flex items-center justify-between group"
+                    aria-expanded={reportsOpen}
+                    aria-label="Relatórios do Mês"
+                >
+                    <div className="flex items-center gap-1.5">
+                        <BarChart2 size={12} className="text-blue-500" />
+                        <span className="text-[10px] font-bold text-text-secondary uppercase">Relatórios do Mês</span>
+                    </div>
+                    <ChevronDown
+                        size={14}
+                        className={cn(
+                            'text-text-secondary transition-transform duration-300',
+                            reportsOpen ? 'rotate-180' : 'rotate-0'
+                        )}
+                    />
+                </button>
+
+                {/* Collapsible content */}
+                <div
+                    className={cn(
+                        'overflow-hidden transition-all duration-300 ease-in-out',
+                        reportsOpen ? 'max-h-[800px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
+                    )}
+                >
+                    {/* Pie + Bar side by side on md+ */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {/* Category Pie Chart */}
+                        <div>
+                            <p className="text-[10px] font-semibold text-text-secondary uppercase mb-1">Despesas por Categoria</p>
+                            <CategoryPieChart data={allCategories} />
+                        </div>
+
+                        {/* Income vs Expense Bar Chart */}
+                        <div>
+                            <p className="text-[10px] font-semibold text-text-secondary uppercase mb-1">Receitas vs Despesas</p>
+                            <IncomeExpenseBarChart
+                                income={summary.monthIncome}
+                                expense={summary.monthLedgerExpense + summary.monthFixedPaid}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Balance Line Chart — full width */}
+                    <div>
+                        <p className="text-[10px] font-semibold text-text-secondary uppercase mb-1">Evolução do Saldo</p>
+                        <BalanceLineChart
+                            ledger={ledger}
+                            fixedExpenses={monthData.fixed.map(f => ({ value: f.value, paid: f.paid, payment_date: f.payment_date ?? null }))}
+                            month={currentMonth}
+                            initialBalance={0}
+                        />
+                    </div>
+                </div>
+            </Card>
+
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {/* Top 5 categories */}
                 {top5Categories.length > 0 ? (

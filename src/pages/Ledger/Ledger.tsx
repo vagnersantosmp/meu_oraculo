@@ -218,7 +218,7 @@ export function Ledger() {
                 }
             }
         } else {
-            const { cardId, ...cleanData } = data;
+            const { cardId, installments: _inst, ...cleanData } = data;
             if (isEditingCredit) {
                 deleteCreditTransaction(editingTransaction!.id);
                 addTransaction(cleanData);

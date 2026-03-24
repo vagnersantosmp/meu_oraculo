@@ -1,0 +1,35 @@
+Aqui está uma sugestão de como você pode interagir com o ChatGPT, fornecendo o arquivo ZIP que acabei de gerar para que ele leia todo o seu código:
+
+## Passo 1: Acesse o ChatGPT
+- Abra o site do ChatGPT (preferencialmente usando a versão Plus com acesso ao GPT-4 ou o GPT-4o gratuito que permite upload de arquivos).
+
+## Passo 2: Faça o upload do arquivo
+- Clique no ícone de "clipe de papel" (Anexar arquivo) e selecione o arquivo que acabei de gerar na pasta do seu projeto:
+👉 `Meu-Oraculo-Source.zip`
+
+## Passo 3: Copie e cole o prompt abaixo
+Copie o texto abaixo e envie junto com o seu arquivo `.zip`:
+
+==================================================
+
+Atue como meu mentor de carreira e recrutador técnico Sênior. Estou reestruturando meu currículo e meu portfólio (LinkedIn/GitHub) e quero adicionar este projeto que desenvolvi, chamado "Meu Oráculo".
+
+**Sobre o Projeto (em anexo):**
+O projeto é um sistema avançado de gestão financeira pessoal. Algumas das features principais são:
+- Dashboard interativo com gráficos (usando Recharts).
+- Gestão completa de transações (Receitas, Despesas, Transferências, com suporte a estornos).
+- Gestão de Listas de Compras atreladas a faturas e limites de cartão.
+- Gestão de Cartões de Crédito (com limites, datas de fechamento e débito dinâmico).
+- Backend como Serviço utilizando Supabase (Autenticação e Database em tempo real via PostgreSQL).
+- Frontend moderno construído com React 19, TypeScript, Vite, e estilizado com Tailwind CSS.
+
+**O que eu preciso de você:**
+1. Leia a estrutura de pastas e os principais arquivos relevantes no .zip para entender o nível de complexidade do código, arquitetura de componentes, hooks (ex: useTransactions, useAuth) e a integração com o Supabase.
+2. Escreva 3 ou 4 bullet points de alto impacto (focados em resultados e uso de tecnologias) para eu colocar na seção de experiência/projetos do meu currículo. Destaque minhas habilidades em React, TypeScript, Tailwind, e Supabase.
+3. Sugira uma descrição atraente e profissional (2 a 3 parágrafos curtos) resumindo o projeto, que servirá de base para o README.md do GitHub e para um post no meu LinkedIn.
+4. Simule uma entrevista técnica: Liste 3 perguntas difíceis que um tech lead faria sobre decisões arquiteturais deste projeto (ex.: "Por que usar Supabase ao invés de Firebase?", "Como você gerenciou o estado complexo das faturas do cartão?"), e sugira respostas que demonstrem senioridade da minha parte.
+
+==================================================
+
+## Passo 4: Revise com o ChatGPT
+- O ChatGPT lerá o seu código fonte através do ZIP, entenderá toda a complexidade da estrutura de arquivos (`src/pages`, `src/hooks`, `src/components`, `src/lib/supabase.ts`) e lhe entregará as respostas personalizadas perfeitamente alinhadas com o que você construiu!

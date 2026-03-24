@@ -97,6 +97,11 @@ export function calculateFinancialSummary(
 
     const pendingVirtual = fixedExpenses
         .filter(f => !f.paid && f.id.startsWith('virtual-invoice'))
+        .filter(f => {
+            // Only count invoices due in THIS month — future invoices don't affect the current month's projection
+            const [fy, fm] = f.due_date.split('-').map(Number);
+            return fy === y && fm === m;
+        })
         .reduce((s, f) => s + f.value, 0);
 
     const fixedPending = pendingPhysical + pendingVirtual;
