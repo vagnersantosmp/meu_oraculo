@@ -38,7 +38,7 @@ const fixedExpense = (
     description: 'Conta',
     category: 'Contas',
     paid: false,
-    payment_date: undefined,
+    payment_date: null,
     created_at: overrides.due_date,
     estimated_value: overrides.value,
     recurring_bill_id: undefined,

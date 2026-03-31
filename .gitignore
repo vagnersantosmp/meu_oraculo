@@ -27,3 +27,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Arquivos de desenvolvimento / rascunho (não fazem parte da aplicação)
+*.zip
+*.pdf
+mobile_nav_mockup.html
+prompt-chatgpt.txt
+post_dev_club.md
+video_teste*.webp
+build-result.txt
+ts-errors.txt

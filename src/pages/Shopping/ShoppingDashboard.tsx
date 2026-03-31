@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { Card, Button } from '../../components/ui';
+import { Card } from '../../components/ui';
 import {
     ArrowLeft,
     TrendingUp,
@@ -324,14 +324,14 @@ export default function ShoppingDashboard() {
                                                     outerRadius={80}
                                                     paddingAngle={2}
                                                     dataKey="value"
-                                                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                                                    label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
                                                     labelLine={false}
                                                 >
                                                     {categoriasExibidas.map((_, index) => (
                                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                                     ))}
                                                 </Pie>
-                                                <Tooltip formatter={(value: number) => [formatCurrency(value), 'Valor']} />
+                                                <Tooltip formatter={(value: number | undefined) => [formatCurrency(value ?? 0), 'Valor']} />
                                             </PieChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -372,7 +372,7 @@ export default function ShoppingDashboard() {
                                                 tick={{ fontSize: 12 }}
                                                 width={75}
                                             />
-                                            <Tooltip formatter={(value: number) => [formatCurrency(value), 'Valor']} />
+                                            <Tooltip formatter={(value: number | undefined) => [formatCurrency(value ?? 0), 'Valor']} />
                                             <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                                                 {categoriasExibidas.map((_, index) => (
                                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -394,7 +394,7 @@ export default function ShoppingDashboard() {
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                                             <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `R$${value}`} />
-                                            <Tooltip formatter={(value: number) => [formatCurrency(value), 'Gasto']} />
+                                            <Tooltip formatter={(value: number | undefined) => [formatCurrency(value ?? 0), 'Gasto']} />
                                             <Bar dataKey="valor" fill="var(--color-primary, #6366f1)" radius={[4, 4, 0, 0]} />
                                         </BarChart>
                                     </ResponsiveContainer>

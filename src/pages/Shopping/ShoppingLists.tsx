@@ -38,9 +38,9 @@ export default function ShoppingLists() {
     const listasAbertas = shoppingLists.filter(l => l.status === 'aberta');
     const listasFinalizadas = shoppingLists.filter(l => l.status === 'finalizada');
 
-    const handleCreateList = () => {
+    const handleCreateList = async () => {
         if (!newListName.trim()) return;
-        const newList = addShoppingList(newListName.trim());
+        const newList = await addShoppingList(newListName.trim());
         setNewListName('');
         setShowNewDialog(false);
         navigate(`/shopping/${newList.id}`);

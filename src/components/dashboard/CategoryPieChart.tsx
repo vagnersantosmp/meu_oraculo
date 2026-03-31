@@ -153,7 +153,7 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
                             <LabelList
                                 dataKey="percentage"
                                 position="right"
-                                formatter={(v: number) => `${v}%`}
+                                formatter={(v: unknown) => `${v as number}%`}
                                 style={{ fontSize: 10, fill: '#9ca3af' }}
                             />
                         </Bar>
