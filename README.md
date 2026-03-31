@@ -1,52 +1,99 @@
-# Meu Oráculo - Gestão Financeira Pessoal
+# 🔮 Meu Oráculo
 
-## 📌 Sobre o Projeto
-**Meu Oráculo** é um sistema completo e moderno de gestão financeira pessoal e controle de gastos. Desenvolvido para proporcionar clareza, organização e previsibilidade sobre a sua vida financeira, o aplicativo permite que você acompanhe suas receitas, despesas (fixas e variáveis), cartões de crédito, e muito mais, tudo em uma interface limpa e intuitiva.
+!
 
-### 🌟 Principais Benefícios
-- **Clareza Financeira:** Visualize rapidamente para onde seu dinheiro está indo através de gráficos dinâmicos e relatórios na Dashboard.
-- **Controle Total:** Gerencie cartões de crédito, despesas recorrentes e listas de compras em módulos específicos e interligados.
-- **Tomada de Decisão:** Baseie suas decisões financeiras em dados concretos e atualizados em tempo real.
-- **Organização Centralizada:** Veículos, compras do mês, faturas e lançamentos diários, tudo no mesmo lugar e disponível a qualquer momento.
+**Meu Oráculo** é uma aplicação web completa para gestão financeira e organização pessoal. Construída com tecnologias modernas, a plataforma oferece não apenas o rastreamento de receitas e despesas, mas também ferramentas dedicadas para gerenciar cartões de crédito, contas fixas, veículos, listas de compras e metas mensais. O objetivo é fornecer uma visão 360º da sua saúde financeira em um só lugar.
 
 ---
 
-## ♿ Acessibilidade Integrada
-O **Meu Oráculo** foi construído com a acessibilidade em mente desde o primeiro dia. O projeto inclui comandos de acessibilidade e navegação otimizada para garantir que usuários com diferentes necessidades possam utilizar a aplicação de forma autônoma e sem barreiras. As implementações de acessibilidade focam em melhorar o suporte a leitores de tela em elementos iterativos e na clareza geral da hierarquia e do contraste da interface.
+## ✨ Principais Funcionalidades
+
+- **📊 Dashboard Interativo**: Visão geral financeira com resumo de saldo, receitas vs. despesas, gráficos interativos (Pizza e Barras) e ranking de maiores gastos.
+- **💰 Livro Caixa (Ledger)**: Registro detalhado de transações (receitas e despesas) com categorização.
+- **💳 Cartões de Crédito**: Gestão de cartões, limites e acompanhamento de faturas (transações e pagamentos virtuais).
+- **📅 Contas Fixas (Bills)**: Controle de despesas recorrentes e contas a pagar, com alertas de vencimento.
+- **🚗 Gestão de Veículos (Car)**: Rastreamento de abastecimentos (combustível) e manutenções preventivas/corretivas com alertas de quilometragem.
+- **🛒 Listas de Compras**: Criação e gestão de listas de compras dinâmicas, integradas com um catálogo de produtos compartilhados.
+- **🎯 Metas Mensais**: Definição de metas de gastos para ajudar no controle orçamentário.
+- **🔐 Autenticação e Segurança**: Sistema de login, cadastro e recuperação de senha seguro.
+- **♿ Acessibilidade**: Menu dedicado de acessibilidade para adaptar a experiência do usuário.
+
+## 🛠 Tecnologias Utilizadas
+
+O projeto utiliza um stack moderno para garantir alta performance, manutenibilidade e escalabilidade:
+
+### Frontend
+- **[React 19](https://react.dev/)**: Biblioteca principal para construção da interface de usuário.
+- **[Vite](https://vitejs.dev/)**: Bundler ultrarrápido para desenvolvimento.
+- **[TypeScript](https://www.typescriptlang.org/)**: Tipagem estática para maior segurança do código.
+- **[Tailwind CSS](https://tailwindcss.com/)**: Framework CSS utilitário para estilização rápida e responsiva.
+- **[React Router v7](https://reactrouter.com/)**: Navegação e roteamento do lado do cliente (SPA).
+- **[Recharts](https://recharts.org/)**: Biblioteca para renderização de gráficos complexos.
+- **[Lucide React](https://lucide.dev/)**: Ícones elegantes e consistentes.
+
+### Backend / BaaS
+- **[Supabase](https://supabase.com/)**: Backend-as-a-Service utilizado para:
+  - Banco de Dados PostgreSQL.
+  - Autenticação de usuários (Auth).
+
+## 🚀 Como Executar o Projeto Localmente
+
+### Pré-requisitos
+- [Node.js](https://nodejs.org/) (versão 18 ou superior recomendada)
+- [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
+- Uma conta no [Supabase](https://supabase.com/) configurada.
+
+### Passo a Passo
+
+1. **Clone o repositório**
+   ```bash
+   git clone https://github.com/seu-usuario/meu-oraculo.git
+   cd meu-oraculo
+   ```
+
+2. **Instale as dependências**
+   ```bash
+   npm install
+   ```
+
+3. **Configure as Variáveis de Ambiente**
+   Crie um arquivo `.env.local` na raiz do projeto baseado no `.env.example` e insira suas credenciais do Supabase:
+   ```env
+   VITE_SUPABASE_URL=sua_url_do_supabase
+   VITE_SUPABASE_ANON_KEY=sua_anon_key_do_supabase
+   ```
+
+4. **Inicie o servidor de desenvolvimento**
+   ```bash
+   npm run dev
+   ```
+
+5. **Acesse a aplicação**
+   Abra [http://localhost:5173](http://localhost:5173) no seu navegador.
+
+## 🗄 Estrutura do Projeto
+
+Aplica-se uma divisão modularizada dentro do diretório `src/`:
+
+- `/components`: Componentes reutilizáveis da interface (UI base, navegação, modais).
+- `/context`: Contextos globais da aplicação (AppContext, AuthContext, ThemeContext, etc).
+- `/hooks`: Hooks customizados (ex: `useFinancialSummary`).
+- `/lib`: Configurações de serviços externos e utilitários (Supabase client, cálculos financeiros).
+- `/pages`: Componentes de páginas roteáveis divididos por escopo funcional (Auth, Dashboard, Ledger, Shopping, etc).
+- `/types`: Definições globais de interfaces e tipos do TypeScript.
+
+## 🤝 Contribuição
+
+Contribuições são sempre bem-vindas! Se você deseja colaborar:
+1. Faça um Fork do projeto
+2. Crie uma branch para a sua feature (`git checkout -b feature/MinhaFeature`)
+3. Faça o commit das suas alterações (`git commit -m 'feat: Minha nova feature'`)
+4. Faça o push para a branch (`git push origin feature/MinhaFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença [MIT](https://choosealicense.com/licenses/mit/).
 
 ---
-
-## 🧩 Módulos do Sistema
-
-O sistema é modular para facilitar o seu dia a dia em todas as frentes da economia doméstica:
-
-1. **Dashboard & Relatórios:** O coração do aplicativo. Apresenta gráficos de receitas vs despesas, evolução de saldo em contas e distribuição de gastos por categoria para uma visão geral e rápida da sua saúde financeira.
-2. **Lançamentos (Ledger):** Registro diário (livro-caixa) de todas as transações avulsas, tanto de entrada quanto de saída.
-3. **Cartões de Crédito (Cards):** Gestão completa das faturas, limites, transações correntes e compras parceladas de todos os seus cartões.
-4. **Despesas Fixas:** Controle automatizado de contas recorrentes (água, luz, internet, aluguel) para não esquecer nenhum compromisso mensal.
-5. **Listas de Compras (Shopping):** Planejamento preventivo de idas ao supermercado com cálculo automático do total. O fluxo é totalmente integrado com a área de cartões de crédito, debitando ou estornando valores do limite automaticamente ao reabrir ou fechar uma lista.
-6. **Gestão de Veículos (Car):** Acompanhamento preciso das despesas automotivas, controle de revisões/manutenções e histórico de abastecimento.
-7. **Autenticação e Perfil:** Sistema seguro de login (Auth) e painel personalizável de configurações do usuário.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-O projeto utiliza uma stack moderna e robusta para alta performance, escalabilidade e excelente experiência de desenvolvimento:
-
-- **React 19 & Vite 7:** A principal biblioteca para interfaces interativas junto de um _bundler_ e ambiente de desenvolvimento ultrarrápido.
-- **TypeScript:** Superset do JavaScript que adiciona tipagem estática, entregando um código limpo e livre de falhas inesperadas de tipos.
-- **Tailwind CSS:** Framework CSS _utility-first_ que permite estilização responsiva, bonita e rápida diretamente no código.
-- **Supabase:** Plataforma Backend as a Service (BaaS) de código aberto (baseado em PostgreSQL) poderosa para banco de dados e autenticação segura.
-- **Recharts:** Biblioteca leve de componentes para gráficos de dados fluidos e responsivos.
-- **Zod & React Hook Form:** A dupla perfeita para validação rígida, amigável e performática de formulários antes dos dados irem para o servidor.
-- **Lucide React:** Biblioteca de ícones elegantes, consistentes e de alta qualidade.
-
----
-
-## 🚀 Melhorias Futuras (Roadmap)
-Embora a ferramenta seja muito completa, nossa arquitetura permite constante evolução. Entre os planos futuros, temos forte foco em IA e integrações cotidianas:
-
-- **✨ Integração com WhatsApp:** No futuro, será possível lançar despesas, registrar compras de mercado via áudio e receber resumos diários/mensais ou alertas de faturas diretamente no seu WhatsApp utilizando integração com um _Bot_ parceiro do Meu Oráculo.
-- **Previsão de Gastos com IA:** Análises que informarão se você tende a extrapolar o limite no mês de acordo com o padrão das despesas variáveis.
-- **Exportação de Relatórios Gerenciais:** Possibilidade de retirar o compilado por períodos em planilhas detalhadas ou PDFs gerenciais.
-- **Orçamentos e Metas (Budgets):** Definição estrita de balizas de limite de gatos separados por categoria com alertas sempre que a meta correr risco.
+*Desenvolvido com dedicação para facilitar sua vida financeira.* 🚀
